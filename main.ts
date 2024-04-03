@@ -1,4 +1,5 @@
 import { load } from 'https://deno.land/std@0.221.0/dotenv/mod.ts';
+import { serveFile, serveDir } from 'https://deno.land/std/http/file_server.ts';
 
 import OpenAI from 'https://deno.land/x/openai@v4.32.1/mod.ts';
 
@@ -11,7 +12,8 @@ const openai = new OpenAI({
 
 async function generateShoeImage(prompt: string): Promise<string> {
   try {
-    const shoePrompt = `Generate an image of shoes. Details: ${prompt}`;
+    const shoePrompt = `Generate an image of 2 shoes. The entire 2 shoes must be visible. A detailed closeup 
+    of the shoes like on a white display stand. Details: ${prompt}`;
     const response = await openai.images.generate({
       prompt: shoePrompt,
       n: 1, // number of images
@@ -31,10 +33,6 @@ async function generateShoeImage(prompt: string): Promise<string> {
   }
 }
 
-if (import.meta.main) {
-  // await generateShoeImage('A futuristic city skyline at sunset');
-}
-
 Deno.serve(async (req: Request) => {
   const reqURL = new URL(req.url);
   if (reqURL.pathname === '/shoe') {
@@ -44,6 +42,32 @@ Deno.serve(async (req: Request) => {
     return new Response(res, {
       headers: { 'Content-Type': 'text/plain' },
     });
+  }
+
+  if (reqURL.pathname.startsWith('/dist')) {
+    const path = reqURL.pathname;
+    console.log(path);
+    try {
+      const file = await serveDir(req, {});
+      return file;
+    } catch (error) {
+      console.error('Error serving static file:', error);
+      return new Response('File not found', { status: 404 });
+    }
+  }
+  if (reqURL.pathname.startsWith('/assets')) {
+    const path = reqURL.pathname;
+    console.log(path);
+    try {
+      const file = await serveDir(req, {
+        fsRoot: `dist/assets`,
+        urlRoot: 'assets',
+      });
+      return file;
+    } catch (error) {
+      console.error('Error serving static file:', error);
+      return new Response('File not found', { status: 404 });
+    }
   }
 
   return new Response('Forbidden', {

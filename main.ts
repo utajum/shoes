@@ -1,5 +1,5 @@
 import { load } from 'https://deno.land/std@0.221.0/dotenv/mod.ts';
-import { serveFile, serveDir } from 'https://deno.land/std/http/file_server.ts';
+import { serveDir } from 'https://deno.land/std/http/file_server.ts';
 
 import OpenAI from 'https://deno.land/x/openai@v4.32.1/mod.ts';
 
@@ -13,11 +13,12 @@ const openai = new OpenAI({
 async function generateShoeImage(prompt: string): Promise<string> {
   try {
     const shoePrompt = `Generate an image of 2 shoes. The entire 2 shoes must be visible. A detailed closeup 
-    of the shoes like on a white display stand. Details: ${prompt}`;
+    of the shoes. Details: ${prompt}`;
     const response = await openai.images.generate({
       prompt: shoePrompt,
       n: 1, // number of images
-      size: '512x512',
+      model: 'dall-e-3',
+      size: '1024x1024',
       quality: 'standard',
     });
     if (response?.data?.[0]?.url) {

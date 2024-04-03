@@ -39,7 +39,7 @@ Deno.serve(async (req: Request) => {
   const reqURL = new URL(req.url);
   if (reqURL.pathname === '/shoe') {
     const bodyText = await req.text();
-    console.log(bodyText);
+    console.log('BODY ', bodyText);
     const res = await generateShoeImage(bodyText);
     return new Response(res, {
       headers: { 'Content-Type': 'text/plain' },
